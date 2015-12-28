@@ -1,0 +1,131 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/lib/bootstrap.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/lib/bootstrap-datetimepicker.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/lib/keen-dashboards.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/lib/dc.css' %}"/>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/chart.css' %}"/>
+
+    <script type="text/javascript" src="{% static 'js/lib/jquery-2.1.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lib/bootstrap.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lib/moment.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lib/bootstrap-datetimepicker.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'js/lib/crossfilter.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lib/queue.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lib/d3.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lib/dc.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lib/keen.min.js' %}"></script>
+
+     <script type="text/javascript" src="{% static 'js/charts.js' %}"></script>
+
+
+    <meta charset="UTF-8">
+    <title>Sitescope Charts</title>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="./">Recursos</a>
+            </div>
+        </div>
+    </div>
+    <div id="pageContent">
+        <div class="container-fluid">
+            <div class="row">
+                <div class='col-md-7'>
+                    <div class="row">
+                        <div class='col-md-3'>
+                            <div class="form-group">
+                                <select class="form-control" id="sel_host">
+                                    {% for host in hosts %}
+                                        <option value="{{host}}">{{host}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class='col-md-3'>
+                            <div class="form-group">
+                                <select class="form-control" id="sel_metric">
+                                    {% for metric in metrics %}
+                                        <option value="{{metric}}">{{metric}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class='col-md-3'>
+                            <div class="form-group">
+                                <select class="form-control" id="sel_type">
+                                    <option value="line">Linha</option>
+                                    <option value="bar">Barra</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class='col-md-2'>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-success" id="btn_chart">Chart</button>
+                                <img id="loading_gif" src="{% static 'img/loading.gif' %}" height="25" width="25">
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class='col-md-3'>
+                            <div class="form-group">
+                                <select class="form-control" id="sel_ranges">
+                                    <option value="today">Hoje</option>
+                                    <option value="yesterday">Ontem</option>
+                                    <option value="last7days">Últimos 7 dias</option>
+                                    <option value="thisMonth">Mês Atual</option>
+                                    <option value="bf2015">Blackfriday 2015</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class='col-md-4'>
+                            <div class="form-group">
+                                <div class='input-group date' id='date_from'>
+                                    <input type='text' class="form-control"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class='col-md-4'>
+                            <div class="form-group">
+                                <div class='input-group date' id='date_to'>
+                                    <input type='text' class="form-control"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class='col-md-2'>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="chart-wrapper">
+                                <div class="chart-title">
+                                    Gráfico
+                                </div>
+                                <div class="chart-stage">
+                                    <div id="time-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+</html>
