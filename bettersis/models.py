@@ -34,4 +34,7 @@ class MonitorMemory(models.Model):
         return '{time}: {monitor} @ {host}'.format(time=self.time,
                                                    monitor=self.name,
                                                    host=self.host)
-    
+
+class Host(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    sitescope = models.ForeignKey(Sitescope)

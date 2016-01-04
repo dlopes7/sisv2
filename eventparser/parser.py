@@ -12,7 +12,7 @@ import django
 import time
 
 from eventparser.utils import guess_event_type, guess_host_name, get_corrected_metrics
-from bettersis.models import MonitorCPU, Sitescope, MonitorMemory
+from bettersis.models import MonitorCPU, Sitescope, MonitorMemory, Host
 
 
 django.setup()
@@ -70,6 +70,8 @@ def process_events(sitescope, date):
 
             line_array = line.split('\t')[:6]
             event_date = datetime.strptime(line_array[col_time], time_format)
+            if oldest_event is None:
+                oldest_event = datetime(2015, 1, 1)
 
 
             if event_date < oldest_event:
@@ -84,7 +86,8 @@ def process_events(sitescope, date):
                                'monitor': line_array[col_monitor_name],
                                'metrics': line_array[col_metrics],
                                'sitescope': sitescope.name,
-                               'group': line_array[col_group_id]}
+                               'group': line_array[col_group_id],
+                               }
 
                 line_struct['type'] = guess_event_type(line_struct)
                 line_struct['host'] = guess_host_name(line_struct)
@@ -96,32 +99,49 @@ def process_events(sitescope, date):
                                                                         num_events=num_line,
                                                                         num_news=num_new))
 
+def get_host_list(sitescope):
+    print (sitescope)
+
+    for monitor in MonitorCPU.objects.filter(sitescope=sitescope).distinct('host'):
+        yield monitor.host.lower()
+
+def populate_hosts():
+    for sitescope in Sitescope.objects.all():
+        hosts = get_host_list(sitescope)
+
+        for host in hosts:
+            Host.objects.get_or_create(name=host, sitescope=sitescope)
+
+
 
 if __name__ == '__main__':
     sitescopes = [
-                  'hp-sitescope001',
-                  #'hp-sitescope002',
+                  #'hp-sitescope001',
+                  'hp-sitescope002',
                   #'hp-sitescope003',
                   #'hp-sitescope004',
                   #'hp-sitescope005',
                  ]
 
-    while True:
-        for sitescope in sitescopes:
-            sis_address = '{sis}.dc.nova'.format(sis=sitescope)
-            sis_model, created = Sitescope.objects.get_or_create(name=sitescope, address=sis_address)
+    populate_hosts()
+    #
+    #while True:
+    for sitescope in sitescopes:
+        sis_address = '{sis}.dc.nova'.format(sis=sitescope)
+        sis_model, created = Sitescope.objects.get_or_create(name=sitescope, address=sis_address)
 
-            start_date = datetime.now()
-            end_date = datetime.now()
+       # start_date = datetime.now()
+        start_date = datetime(2015, 11, 26)
+        end_date = datetime.now()
 
-            difference = (end_date - start_date).days
+        difference = (end_date - start_date).days
 
-            for single_date in (start_date + timedelta(n) for n in range(difference+1)):
-                print('{date}: Processing {day}'.format(date=datetime.now(),
-                                                        day=single_date))
-                process_events(sis_model, single_date)
+        for single_date in (start_date + timedelta(n) for n in range(difference+1)):
+            print('{date}: Processing {day}'.format(date=datetime.now(),
+                                                    day=single_date))
+            process_events(sis_model, single_date)
 
-        time.sleep(5 * 60)
+     #   time.sleep(5 * 60)
 
 
 

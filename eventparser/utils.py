@@ -23,7 +23,7 @@ def parse_cpu(metrics):
     m = None
     exps = [
             re.compile(r'.*Processor\\_Total\\% Processor Time=([0-9]+,[0-9][0-9]).*', re.M),
-            re.compile(r'([0-9]+)% avg,', re.M),
+            re.compile(r'^([0-9]+)% avg,', re.M)
             ]
 
     for exp in exps:
@@ -37,9 +37,9 @@ def parse_cpu(metrics):
 
 
 def guess_event_type(event):
-    pp = pprint.PrettyPrinter(indent=4)
 
     monitor = event['monitor']
+
 
 
     #Sitescope001 -----------------------------------------------------
@@ -61,8 +61,9 @@ def guess_event_type(event):
         return 'disk'
 
     #CPU
+
     elif (#'Processor Info on' in monitor or
-          'CPU Monitor' in monitor):
+          'cpu monitor' in monitor.lower()):
         return 'cpu'
 
     elif ('Teste de Disponibilidade' in monitor):
@@ -118,7 +119,6 @@ def guess_event_type(event):
         return 'ignore'
 
     else:
-        #pp.pprint(monitor)
         return 'unknown'
 
 def get_corrected_metrics(event):

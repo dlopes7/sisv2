@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from django.core import serializers
@@ -5,22 +6,28 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 
 
-from bettersis.models import MonitorCPU, MonitorMemory
+from bettersis.models import MonitorCPU, MonitorMemory, Sitescope, Host
 
 
 
-def get_host_list():
-    for host in MonitorCPU.objects.values('host').distinct():
-        yield host['host'].lower()
+def get_host_list(sitescope):
+    for host in Host.objects.filter(sitescope=sitescope):
+        yield host.name.lower()
 
+def view_host_list(request):
+
+    sitescope_name = request.GET['sitescope']
+    sitescope = Sitescope.objects.get(name=sitescope_name)
+    host_list = list(get_host_list(sitescope))
+
+    return HttpResponse(json.dumps(host_list), content_type='application/javascript')
 
 def chart(request):
-    host_list = list(get_host_list())
+    sitescope = Sitescope.objects.get(name='hp-sitescope001')
+    host_list = list(get_host_list(sitescope))
     host_list.sort()
 
     metrics = ['Cpu', 'Memory']
-
-
 
     return render(request, 'chart.html', {'hosts': host_list,
                                           'metrics': metrics})
@@ -31,9 +38,12 @@ def json_chart(request):
         metric = request.GET['metric']
         time_from = request.GET['time_from']
         time_to = request.GET['time_to']
+        sitescope= request.GET['sitescope']
 
         time_from_formatted = datetime.strptime(time_from, "%d/%m/%Y %H:%M:%S")
         time_to_formatted = datetime.strptime(time_to, "%d/%m/%Y %H:%M:%S")
+
+        sis = Sitescope.objects.get(name=sitescope)
 
         if metric == 'Cpu':
             monitors = MonitorCPU.objects.filter(host=host,

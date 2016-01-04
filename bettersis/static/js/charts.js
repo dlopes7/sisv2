@@ -4,22 +4,40 @@ function chart(){
     $('#loading_gif').show();
     var host = $( "#sel_host option:selected" ).val();
     var metric = $( "#sel_metric option:selected" ).val();
+    var sitescope = $( "#sel_sitescope option:selected" ).val();
 
 
     var time_from = $('#date_from').data("DateTimePicker").date().format("D/M/YYYY HH:mm:ss");
     var time_to = $('#date_to').data("DateTimePicker").date().format("D/M/YYYY HH:mm:ss");
 
     queue()
-    .defer(d3.json, "/json_chart/?host=" + host + "&metric=" + metric + "&time_from="+time_from + "&time_to=" + time_to)
+    .defer(d3.json, "/json_chart/?host=" + host +
+        "&metric=" + metric +
+        "&time_from="+time_from +
+        "&time_to=" + time_to +
+        "&sitescope=" + sitescope)
     .await(makeGraphs);
 
 
 }
 
 $( document ).ready(function() {
-    $('#loading_gif').hide();
+    var loading_gif = $('#loading_gif');
+
+    loading_gif.hide();
     $( "#btn_chart" ).click(function() {
         chart();
+    });
+
+    $('#sel_sitescope').on('change', function() {
+        loading_gif.show();
+
+        var sitescope = $( "#sel_sitescope option:selected" ).val();
+
+        queue()
+        .defer(d3.json, "/host_list/?sitescope=" + sitescope)
+        .await(populateHostList);
+
     });
 
     $('#sel_ranges').on('change', function() {
@@ -92,20 +110,18 @@ $( document ).ready(function() {
 
 });
 
-function humanFileSize(bytes, si) {
-    var thresh = si ? 1000 : 1024;
-    if(Math.abs(bytes) < thresh) {
-        return bytes + ' B';
-    }
-    var units = si
-        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-    var u = -1;
-    do {
-        bytes /= thresh;
-        ++u;
-    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-    return bytes.toFixed(2)+' '+units[u];
+function populateHostList(error, hosts){
+    var loading_gif = $('#loading_gif');
+
+    var $el = $("#sel_host");
+    $el.empty(); // remove old options
+
+    hosts.forEach(function(d) {
+        $el.append($("<option></option>")
+     .attr("value", d).text(d));
+    });
+    loading_gif.hide();
+
 }
 
 function makeGraphs(error, executions) {
@@ -116,6 +132,7 @@ function makeGraphs(error, executions) {
     if (num_executions == 0){
             alert(num_executions + ' execuções encontradas');
            $('#loading_gif').hide();
+        return;
     }
 
     executions.forEach(function(d) {

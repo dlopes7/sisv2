@@ -1,1 +1,12 @@
 body { padding-top: 70px; }
+
+
+#sel_sitescope{
+    background: #5bcc97 !important;
+    color: #000000;
+
+}
+option:not(:checked) {
+    background-color: white;
+    color:#000;
+}
